@@ -46,7 +46,6 @@ export default {
                 }
         },
         test(){
-            
             console.log(this.$store.state.userMessage)
         }
     }
