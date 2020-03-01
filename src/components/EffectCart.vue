@@ -4,6 +4,11 @@
             <p>您的购物车还没有商品哦~</p>
             <van-button size="small" to="/effect/eclass" class="stroll">去逛逛</van-button>
         </div>
+        <div class="cartMan">
+          <p></p>
+          <p class="mod">购物车(9)</p>
+          <p class="right" @click="delTrans">{{delTransText}}</p>
+        </div>
         <div class="cartList">
           <div class="com" v-for="(item,i) of cartList" :key="i">
             <div class="shopName">
@@ -91,6 +96,13 @@
               </div>
           </div>
         </van-popup>
+        <div class="delCart" v-show="!submitOff">
+          <div class="left" @click="allDelEvent">
+            <van-icon name="checked" size="20px" :color="allDelBtn?'#FE0002':'#DBDBDB'" /><!--:color="item.cb?'#FE0002':'#DBDBDB'"allDel-->
+            <p>全选</p>
+          </div>
+          <van-Button class="btn" size="small" color="linear-gradient(to right, #ff6034 , #ee0a24 )" @click="allDelBtnEvent">删除</van-Button>
+        </div>
         <van-submit-bar class="submit" v-show="submitOff"
           :price="allPrice"
           button-text="提交订单"
@@ -120,6 +132,8 @@ export default {
           },
           allPrice:0,
           allBtn:false,
+          allDelBtn:false,
+          delTransText:'管理',
           popupOff:false,
           shopOff:true,
           shopLOaderText:'正在加载',
@@ -161,6 +175,29 @@ export default {
               this.isCart=true
               this.submitOff=false
             }
+        },
+        allDelEvent(){
+          this.allDelBtn=!this.allDelBtn
+          if(this.allDelBtn) this.allCheckEvent(true)
+          else this.allCheckEvent(false)
+        },
+        allDelBtnEvent(){
+          this.cartList.forEach((value,key)=>{
+            for(let iten of value.data){
+              if(item.cb){
+                
+              }
+            }
+          })
+        },
+        delTrans(){
+          if(this.delTransText=='管理') {
+            this.delTransText='完成'
+            this.submitOff=false
+          }else{
+            this.delTransText='管理'
+            this.submitOff=true
+          }
         },
         IconShopBtn(id){ //购物车列表左侧店铺全选
         try{
@@ -278,7 +315,8 @@ export default {
 <style scoped lang='less'>
 .home{
     width:100vw;
-    padding-bottom:50px;
+    // padding-bottom:50px;
+    padding:50px 0;
     height:100vh;
     overflow-y:scroll;
     .header{
@@ -302,6 +340,21 @@ export default {
             background-color:#f5f5f5;
             border:1px solid #e7e7e7;
         }
+    }
+    .cartMan{
+      position:fixed;
+      left:0;
+      top:0;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 3.5vw;
+      height:50px;
+      width:100%;
+      background-color:#fff;
+      border-bottom:1px solid #f3f3f3;
+      color:#333;
     }
     .cartList{
       .com{
@@ -384,6 +437,34 @@ export default {
       left:0;
       bottom:50px;
       border-top:1px solid #f3f3f3;
+    }
+    .delCart{
+      position:fixed;
+      border-top:1px solid #f3f3f3;
+      z-index:1;
+      left:0;
+      bottom:50px;
+      height:50px;
+      width:100%;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:0 3.5vw;
+      background-color:#fff;
+      .left{
+        display:flex;
+        p{
+          margin-left:10px;
+          font-size:0.9rem;
+          color:#333;
+        }
+      }
+      .btn{
+        width:110px;
+        height:40px;
+        border-radius:24px;
+        font-size:0.9rem;
+      }
     }
     .the_title{
         width:100%;

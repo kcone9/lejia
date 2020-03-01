@@ -36,11 +36,11 @@ export default {
         this.init()
     },
     beforeRouteEnter(to,form,next){
-        console.log('进入当前组件')
+        // console.log('进入当前组件')
         next()
     },
     beforeRouteUpdate(to,form,next){
-        console.log('更新组件',to,form)
+        // console.log('更新组件',to,form)
         var tabList=[{text:"/effect/eclass"},{text:"/ecffect/filt"},{text:"/effect/cart"},{text:"/login"}]
         tabList.forEach((value,key)=>{
             // value.key=key

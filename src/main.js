@@ -13,7 +13,8 @@ var store=new Vuex.Store({
     userMessage:{
       userId:null,
       userName:null,
-      passWord:null
+      passWord:null,
+      headerSrc:null
     }
   },
   getters:{

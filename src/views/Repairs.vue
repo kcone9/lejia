@@ -10,7 +10,7 @@
         </div>
         <div class="hr"></div>
         <div class="input">
-            <van-field v-model="useName" placeholder="请输入您的姓名" label="姓名" right-icon="close"/>
+            <van-field v-model="userName" placeholder="请输入您的姓名" label="姓名" right-icon="close"/>
             <van-field v-model="phone" type='tel' placeholder="请输入您的手机号码" label="电话" right-icon="close"/>
         </div>
         <div class="hr"></div>

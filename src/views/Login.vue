@@ -21,6 +21,7 @@
 </template>
 <script>
 import {Toast} from 'vant'
+import axios from 'axios'
 export default {
     data(){
         return {
@@ -39,6 +40,7 @@ export default {
                         if(res.data){
                             var userMessage={userId:res.data[0].id,userName:res.data[0].userName,passWord:res.data[0].passWord}
                             this.$store.dispatch('login',userMessage)
+                            this.$router.go(-1)
                         }
                     }).catch((err)=>{
                         if(err=='Error: timeout of 10000ms exceeded') Toast('登录超时，请检查网路配置')
@@ -48,6 +50,15 @@ export default {
         test(){
             console.log(this.$store.state.userMessage)
         }
+    },
+    beforeRouteEnter(to,from,next){
+        axios.get('http://127.0.0.1:5050/lejia/logout',{timeout:2000}).then(res=>{
+            if(res.data.userId!=null) next('/effect/cart')
+                else next()
+        }).catch(err=>{
+            if(err=='Error: timeout of 10000ms exceeded') Toast('登录超时，请检查网路配置')
+        })
+        
     }
 }
 </script>

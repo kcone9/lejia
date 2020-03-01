@@ -268,11 +268,11 @@ export default {
       },
       scrollHome(e){
         var height=e.target.scrollHeight-this.$refs.tabs.$vnode.elm.lastChild.clientHeight-44 // 导航滑动到其他位置时，新出现导航
-        if(e.target.scrollTop>height){
+        /*if(e.target.scrollTop>height){
           this.top=true
         }else{
           this.top=false
-        }
+        }*/
       }
     },
     created(){

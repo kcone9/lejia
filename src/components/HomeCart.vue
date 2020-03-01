@@ -5,8 +5,8 @@
             <div class="pad"></div>
             <div class="header">
                 <div class="left">
-                    <van-image :src="$store.state.domain+'test/user1.png'" width="64px" height="64px" round/>
-                    <p>注册/登录</p>
+                    <van-image :src="$store.state.domain+headerSrc" width="64px" height="64px" round/>
+                    <p>{{userName}}</p>
                 </div>
                 <router-link to='/customer' class="right">
                     <van-icon name="service-o" color="#fff" size="24px"/>
@@ -81,7 +81,8 @@ export default {
             serveIcon:[],
             pagText:[],
             gridIcon:[],
-            height:1000
+            height:1000,
+            userName:'注册/登录'
         }
     },
     methods:{
@@ -111,11 +112,18 @@ export default {
                     else value.to='/login'
             })
             this.gridIcon=grid
+        },
+        isLogin(){ //登录判断
+            if(this.$store.state.userMessage.userId!==null){
+                console.log(233)
+                this.userName=this.$store.state.userMessage.userName
+                this.headerSrc=this.$store.state.userMessage.headerSrc
+            }
         }
     },
     created(){
         this.init()
-        
+        this.isLogin()
     },
     mounted(){
         var element=this.$refs.grid.$vnode.elm
