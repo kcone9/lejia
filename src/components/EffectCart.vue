@@ -1,12 +1,12 @@
 <template>
-    <div class="home" :style="{'paddingBottom':paddingBottom+'px'}">
+    <div class="home" :style="{'paddingBottom':paddingBottom+'px','paddingTop':paddingTop+'px'}">
         <div class="header" v-show="isCart">
             <p>您的购物车还没有商品哦~</p>
             <van-button size="small" to="/effect/eclass" class="stroll">去逛逛</van-button>
         </div>
-        <div class="cartMan">
+        <div class="cartMan" v-show="!isCart">
           <p></p>
-          <p class="mod">购物车(9)</p>
+          <p class="mod">购物车({{cartNumValue}})</p>
           <p class="right" @click="delTrans">{{delTransText}}</p>
         </div>
         <div class="cartList">
@@ -88,22 +88,22 @@
               </div>
               <div class="btn">
                   <div class="btns">
-                      <van-button color="linear-gradient(to right, #f68817 , #fcac3d )" size="large">加入购物车</van-button>
+                      <van-button color="linear-gradient(to right, #f68817 , #fcac3d )" size="large"  @click="setCartBtn(addCart.count)">加入购物车</van-button>
                   </div>
                   <div class="btns">
-                      <van-button color="linear-gradient(to right, #ff3061 , #fe0001 )" size="large">立即购买</van-button>
+                      <van-button color="linear-gradient(to right, #ff3061 , #fe0001 )" size="large" @click="onSubmitBtn">立即购买</van-button>
                   </div>
               </div>
           </div>
         </van-popup>
-        <div class="delCart" v-show="!submitOff">
+        <div class="delCart" v-show="!submitOff && !isCart" >
           <div class="left" @click="allDelEvent">
             <van-icon name="checked" size="20px" :color="allDelBtn?'#FE0002':'#DBDBDB'" /><!--:color="item.cb?'#FE0002':'#DBDBDB'"allDel-->
             <p>全选</p>
           </div>
           <van-Button class="btn" size="small" color="linear-gradient(to right, #ff6034 , #ee0a24 )" @click="allDelBtnEvent">删除</van-Button>
         </div>
-        <van-submit-bar class="submit" v-show="submitOff"
+        <van-submit-bar class="submit" v-show="submitOff" 
           :price="allPrice"
           button-text="提交订单"
           @submit="onSubmitBtn"
@@ -119,6 +119,7 @@ export default {
     data(){
         return {
           paddingBottom:50,
+          paddingTop:0,
           shopList:[],
           shopAll:[],
           cartList:[],
@@ -139,7 +140,9 @@ export default {
           shopLOaderText:'正在加载',
           top:false,
           isCart:true,
-          submitOff:true //提交组件显示
+          submitOff:true, //提交组件显示
+          cartNumValue:0,
+          dataSave:{}
         }
     },
     methods:{
@@ -156,39 +159,65 @@ export default {
                 this.getData(parseInt(sessionStorage.getItem('lejia-cartid')))
             }*/
             // 检查浏览器是否有购物车缓存
-            if(localStorage['lejiaCarts']){
-              let list=JSON.parse(localStorage['lejiaCarts'])
-              // let price=0;
-              for(let value of list){
-                value.cb=false
-                for(let item of value.data){
-                  item.cb=false
-                  // price=price+item.price*item.num
-                }
-              }
-              this.allPrice=0
-              this.cartList=list
-              this.isCart=false
-              this.paddingBottom=100
-              this.submitOff=true
-            } else {
-              this.isCart=true
-              this.submitOff=false
-            }
+            this.cartStorage()
         },
-        allDelEvent(){
+        cartStorage(){
+          if(localStorage['lejiaCarts'] | localStorage['lejiaCarts']!='[]'){
+            let list=JSON.parse(localStorage['lejiaCarts'])
+            // let price=0;
+            for(let value of list){
+              value.cb=false
+              for(let item of value.data){
+                item.cb=false
+                // price=price+item.price*item.num
+              }
+            }
+            this.allPrice=0
+            this.cartList=list
+            this.isCart=false
+            this.paddingBottom=100
+            this.submitOff=true
+            this.cartNumEvent()
+            this.paddingTop=50
+          } else {
+            this.isCart=true
+            this.submitOff=false
+          }
+        },
+        allDelEvent(){ //删除与完成切换
           this.allDelBtn=!this.allDelBtn
           if(this.allDelBtn) this.allCheckEvent(true)
           else this.allCheckEvent(false)
         },
-        allDelBtnEvent(){
-          this.cartList.forEach((value,key)=>{
-            for(let iten of value.data){
-              if(item.cb){
-                
+        allDelBtnEvent(){ // 删除选中的标签
+          for(let i=0;i<this.cartList.length;i++){
+            if(this.cartList[i].cb){
+              this.cartList.splice(i,1)
+              i--
+            }else{
+              for(let j=0;j<this.cartList[i].data.length;j++){
+                if(this.cartList[i].data[j].cb){
+                  this.cartList[i].data.splice(j,1)
+                  j--
+                }
               }
             }
-          })
+          }
+          localStorage['lejiaCarts']=JSON.stringify(this.cartList)
+          this.cartNumEvent()
+        },
+        cartNumEvent(){ //统计购物车数量
+          let count=0
+          for(let value of this.cartList){
+            for(let item of value.data){
+              if(item) count++
+            }
+          }
+          if(count==0){
+            this.isCart=true
+            this.paddingTop=0
+          }
+          this.cartNumValue=count
         },
         delTrans(){
           if(this.delTransText=='管理') {
@@ -198,6 +227,7 @@ export default {
             this.delTransText='管理'
             this.submitOff=true
           }
+          this.allCheckEvent(false)
         },
         IconShopBtn(id){ //购物车列表左侧店铺全选
         try{
@@ -258,6 +288,83 @@ export default {
           }
           this.IconAllPrice()
         },
+        setCartBtn(num){
+          // 加入购物车
+          var list=[]
+          if(localStorage['lejiaCarts'] && localStorage['lejiaCarts']!=='[]'){
+            list=JSON.parse(localStorage['lejiaCarts'])
+            try{
+            list.forEach((value,key)=>{
+                if(value.shopId==this.dataSave.product[0].shopId){
+                    value.data.forEach((item,ids)=>{
+                        if(item.id===this.dataSave.product[0].id){
+                            Toast({
+                                  message:'已在购物车中',
+                                  duration:1000
+                              })
+                            throw new Error("跳出循环")
+                        }else if(ids===(value.data.length-1)){
+                            console.log('已添加与本商品同店铺的其他商品，但本商品未添加')
+                            this.addCartData(list,num)
+                            throw new Error("跳出循环")
+                        }
+                    })
+                }else if(key===(list.length-1)){
+                    console.log('将该商品加入新的店铺')
+                    this.addCartData(list,num)
+                }
+            })
+          } catch (errMsg){}
+          }else{
+            list.push({shopId:this.dataSave.product[0].shopId,name:this.dataSave.product[0].name,data:[{
+                title:this.dataSave.product[0].title,
+                sel:this.dataSave.product[0].sel,
+                price:this.dataSave.product[0].price,
+                id:this.dataSave.product[0].id,
+                imgSmall:this.dataSave.product[0].imgSmall,
+                num:num
+            }]})
+            localStorage['lejiaCarts']=JSON.stringify(list)
+            this.cartStorage()
+          }
+        },
+        addCartData(data,num){
+          //加商品加入购物车(浏览器已缓存,但没有当前商品)
+          for(let i=0;i<data.length;i++){
+              if(data[i].shopId===this.dataSave.product[0].shopId){// 在原有店铺上加入产品
+              console.log('在原有店铺上加入产品')
+                  data[i].data.push({
+                      title:this.dataSave.product[0].title,
+                      sel:this.dataSave.product[0].sel,
+                      price:this.dataSave.product[0].price,
+                      id:this.dataSave.product[0].id,
+                      imgSmall:this.dataSave.product[0].imgSmall,
+                      num:num
+                  })
+                  localStorage['lejiaCarts']=JSON.stringify(data)
+                  this.cartStorage()
+                  this.addCartSuccess()
+                  break
+              }else if(i===(data.length-1)){
+                  console.log('商品会被加入到新店铺')
+                  data.push({shopId:this.dataSave.product[0].shopId,name:this.dataSave.product[0].name,data:[{ //商品会被加入到新店铺
+                      title:this.dataSave.product[0].title,
+                      sel:this.dataSave.product[0].sel,
+                      price:this.dataSave.product[0].price,
+                      id:this.dataSave.product[0].id,
+                      imgSmall:this.dataSave.product[0].imgSmall,
+                      num:num
+                  }]})
+                  localStorage['lejiaCarts']=JSON.stringify(data)
+                  this.cartStorage()
+                  this.addCartSuccess()
+                  break
+              }
+          }
+        },
+        jump(i){
+          this.$router.push({name:`Details`,params:{id:i}})
+        },
         shopBtn(key){
             this.popupOff=true
             this.addCart.price=this.shopList[key].price
@@ -265,6 +372,9 @@ export default {
             this.addCart.remark=this.shopList[key].account
             this.addCart.spec=this.shopList[key].sel
             this.addCart.cash=this.shopList[key].cash
+            this.axios.get(this.$store.state.domain+`lejia/detail?id=${key}`).then(res=>{
+              this.dataSave=res.data
+            })
         },
         shopAdd(){
           if(this.shopOff){
@@ -284,14 +394,16 @@ export default {
           }
       },
       onSubmitBtn(){
-        Toast({
-            message:'请登录',
-            duration:1000
-        })
         setTimeout(()=>{
             this.$router.push({path:'/login'})
         },1000)
-      }
+      },
+      addCartSuccess(){
+        Toast({
+            message:'添加成功！',
+            duration:1000
+        })
+      },
     },
     created(){
         this.init()

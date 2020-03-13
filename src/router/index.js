@@ -70,6 +70,11 @@ export default new Router({
         name:'effectCart',
         component:()=>import('@/components/EffectCart')
       }]
+    },
+    {
+      path:'/comments', //评价列表
+      name:'Commants',
+      component:()=> import('@/views/Comments')
     }
   ]
 })

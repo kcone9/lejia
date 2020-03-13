@@ -13,11 +13,11 @@
         </van-goods-action-->
         <div class="goodsAction">
             <div class="left">
-                <div class="com" @click="jumpCustomer()">
+                <div class="com" @click="jump('/customer')">
                     <van-icon name="chat-o" color="#323233" size="22px"/>
                     <p>客服</p>
                 </div>
-                <div class="com" @click="jumpEffectCart()">
+                <div class="com" @click="jump('cart')">
                     <van-icon name="cart-o" color="#323233" size="22px"/>
                     <p>购物车</p>
                 </div>
@@ -78,7 +78,7 @@
             <div class="evaluate">
                 <div class="top">
                     <p class="left">用户评价</p>
-                    <p class="right">更多
+                    <p class="right" @click="jump('/comments')">更多
                         <van-icon name="arrow" color="#666"/>
                     </p>
                 </div>
@@ -88,13 +88,13 @@
                             <div class="pad">
                                 <div class="tops">
                                     <div class="left">
-                                        <van-image width="35px" height="35px" round/>
+                                        <van-image width="35px" height="35px" :src="$store.state.domain+item.author_src" round/>
                                         <div class="author">
-                                            <p class="name">{{item.name}}</p>
+                                            <p class="name">{{item.author}}</p>
                                             <van-rate v-model="item.star" :size="12" color="#FFA201" void-icon="star" void-color="#f5f5f5" />
                                         </div>
                                     </div>
-                                    <div class="right">{{item.date}}</div>
+                                    <div class="right">{{item.comment_time}}</div>
                                 </div>
                                 <p class="evaluate_spec">{{item.spec}}</p>
                                 <p class="text">{{item.text}}</p>
@@ -186,12 +186,17 @@ export default {
     methods:{
         init(){
             //评价轮播数据
-            var swipe={name:'Kimmy',star:5,data:'2020-01-29',spec:'规格:1 盒 *2 kg',text:'好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！'}
+            this.axios.get(this.$store.state.domain+'lejia/comment').then(res=>{
+                // console.log(res.data)
+                var list=res.data
+                for(let value of list) value.comment_time=value.comment_time.slice(0,value.comment_time.indexOf('T'))
+                this.swipeList=res.data
+            })
+            /*var swipe={name:'Kimmy',star:5,data:'2020-01-29',spec:'规格:1 盒 *2 kg',text:'好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！好评！'}
             var list=[]
             for(let i=0;i<6;i++){
                 list.push(swipe)
-            }
-            this.swipeList=list
+            }*/
             //跳转传过来的参数,并处理浏览器刷新无数据问题
             if(this.$route.params.id !== undefined | this.$route.params.id !==null){
                 var i=this.$route.params.id
@@ -208,11 +213,16 @@ export default {
             this.$router.push({name:'effectCart',params:{id:this.dataSave.product[0].id}})
             // console.log(JSON.parse(localStorage['lejiaCarts']))
         },
+        jump(path,id){
+            if(path=='cart') this.$router.push({name:'effectCart',params:{id:this.dataSave.product[0].id}})
+            else this.$router.push(path)
+            
+            // this.$router.path(path)
+        },
         setCartBtn(num){
             // 加入购物车
             var list=[]
-            // console.log(num)
-            if(localStorage['lejiaCarts']){
+            if(localStorage['lejiaCarts'] && localStorage['lejiaCarts']!=='[]'){
                 list=JSON.parse(localStorage['lejiaCarts'])
                 try{
                 list.forEach((value,key)=>{
@@ -252,7 +262,6 @@ export default {
         },
         addCartData(data,num){
             //加商品加入购物车(浏览器已缓存,但没有当前商品)
-            
             for(let i=0;i<data.length;i++){
                 if(data[i].shopId===this.dataSave.product[0].shopId){// 在原有店铺上加入产品
                 console.log('在原有店铺上加入产品')

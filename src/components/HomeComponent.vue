@@ -60,7 +60,7 @@
                       <van-button color="linear-gradient(to right, #f68817 , #fcac3d )" size="large" @click="setCartBtn(addCart.count)">加入购物车</van-button>
                   </div>
                   <div class="btns">
-                      <van-button color="linear-gradient(to right, #ff3061 , #fe0001 )" size="large" @click="doBuy">立即购买</van-button>
+                      <van-button color="linear-gradient(to right, #ff3061 , #fe0001 )" size="large" @click="doBuy(true,'请登录')">立即购买</van-button>
                   </div>
               </div>
           </div>
@@ -138,7 +138,7 @@ export default {
       setCartBtn(num){
             // 加入购物车
             var list=[]
-            if(localStorage['lejiaCarts']){
+            if(localStorage['lejiaCarts'] && localStorage['lejiaCarts']!=='[]'){
                 list=JSON.parse(localStorage['lejiaCarts'])
                 try{
                   list.forEach((value,key)=>{
@@ -153,12 +153,14 @@ export default {
                               }else if(ids===(value.data.length-1)){
                                   console.log('已添加与本商品同店铺的其他商品，但本商品未添加')
                                   this.addCartData(list,num)
+                                  this.doBuy(false,'已加入购物车')
                                   throw new Error("跳出循环")
                               }
                           })
                       }else if(key===(list.length-1)){
                           console.log('将该商品加入新的店铺')
                           this.addCartData(list,num)
+                          this.doBuy(false,'已加入购物车')
                       }
                   })
               } catch (errMsg){}
@@ -172,6 +174,7 @@ export default {
                     num:num
                 }]})
                 localStorage['lejiaCarts']=JSON.stringify(list)
+                this.doBuy(false,'已加入购物车')
             }
         },
         addCartData(data,num){
@@ -212,19 +215,20 @@ export default {
           this.addCart.spec=list.sel
           this.addCart.cash=list.cash
           this.axios.get(this.$store.state.domain+`lejia/detail?id=${id}`).then(res=>{
-            console.log(res.data)
             this.dataSave=res.data
           })
       },
-      doBuy(){
-            Toast({
-                message:'请登录',
-                duration:1000
-            })
-            setTimeout(()=>{
-                this.$router.push({path:'/login'})
-            },1000)
-        },
+      doBuy(boolean,text){
+        Toast({
+            message:text,
+            duration:1000
+        })
+        if(boolean){
+          setTimeout(()=>{
+              this.$router.push({path:'/login'})
+          },1000)
+        }
+      },
       tabs(name,title){
         switch(name){
           case 0:
@@ -287,7 +291,7 @@ export default {
           }
       })
       var element=this.$refs.tabs.$vnode.elm.lastChild.firstChild
-      element.getElementsByClassName('load')
+      // element.getElementsByClassName('load')
       setTimeout(()=>{
           inter.observe(element.childNodes[2])
       },0)

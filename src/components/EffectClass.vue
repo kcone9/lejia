@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div class="body" @scroll.capture="bodyScroll($event)" ref="body">
-                <div class="com" v-for="(item,i) of shopList" :key="i" ref="comHeight">
+                <div class="com" v-for="(item,i) of shopList" :key="i" ref="comHeight" @click="jump(item.id)">
                     <div class="img">
                         <van-image :src="$store.state.domain+item.imgSmall" width="80px" height="80px"/>
                         <div class="empty" v-show="item.ifEmpty==1">
@@ -26,7 +26,7 @@
                         <p class="subtitle">{{item.subtitle}}</p>
                         <div class="label">
                             <p class="price">￥{{item.price}}</p>
-                            <p class="myicon" @click="bodyBtn(item.id)" v-show="item.ifEmpty==0">
+                            <p class="myicon" @click.stop="bodyBtn(item.id)" v-show="item.ifEmpty==0">
                                 <van-icon name="add"  color="#FE0000" size="22px"/>
                             </p>
                         </div>
@@ -141,6 +141,9 @@ export default {
         },
         goBack(){
             this.$router.go(-1);
+        },
+        jump(id){
+            this.$router.push({name:`Details`,params:{id:id}})
         }
     },
     created(){
